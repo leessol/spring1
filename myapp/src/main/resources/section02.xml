@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	
+	<bean id="car1" class="com.shinhan.section02.Car">
+	</bean>
+	
+	<!--  -->
+	<bean id="car2" class="com.shinhan.section02.Car">
+		<constructor-arg index="0" value="ABC모델"></constructor-arg>	
+		<constructor-arg index="1" value="1000"></constructor-arg>	
+	</bean>
+	
+	<!-- 생성자를 통해서 객체 생성 -->
+	<bean id="car3" class="com.shinhan.section02.Car">
+		<constructor-arg name="model" value="ABC모델"></constructor-arg>	
+		<constructor-arg name="price" value="2000"></constructor-arg>	
+	</bean>
+	
+	<!-- setter를 통해서 객체 생성 -->
+	<bean id="p1" class="com.shinhan.section02.People">
+		<property name="name" value="홍길동"></property>
+		<property name="age" value="20"></property>
+		<property name="car" ref="car3"></property>
+		<!-- ref는 참조. 이미 만들어진 객체를 참조하겠다는 뜻이다.  -->
+	</bean>
+	
+		
+	
+	<!-- scope의 default는 singleton, 1번만 생성한다.  
+	scope = "prototype" 얻을 때마다 getBean() 하는 것이다. 같은 객체를 사용해서 계속 생성되는 의미이다. 
+	-->	
+	<bean id="p2" class="com.shinhan.section02.People" autowire="byName" scope="singleton" >
+		<property name="name" value="홍길동"></property>
+		<property name="age" value="20"></property>
+		<!-- name="car"와 같은 이름의 bean이 있으면, 자동 주입한다. ==> autowire / 없으면 null -->
+		<!-- property의 car 변수의 타입과 같은 타입의 bean 이 있으면 자동으로 주입한다. autowire / 없으면 null -->	
+		<!-- <property name="car" ref="car3"></property> -->
+		<property name="major">
+			<list>
+				<value>컴퓨터공학과</value>
+				<value>영어영문학과</value>
+			</list>
+		</property>
+		<property name="licenseList">
+			<list>
+				<ref bean="li1"/>
+				<ref bean="li2"/>
+			</list>
+		</property>
+		<property name = "books">
+			<map>
+				<entry>
+				<key><value>첫번째 책</value></key>
+				<ref bean="book1"></ref>
+				</entry>
+				<entry>
+				<key><value>두번째 책</value></key>
+				<ref bean="book2"></ref>
+				</entry>
+				<entry>
+				<key><value>세번째 책</value></key>
+				<ref bean="book3"></ref>
+				</entry>	
+			</map>
+		</property>
+		<property name="friend">
+			<set value-type="java.lang.Integer">
+				<value>1</value>
+				<value>2</value>
+			</set>
+		</property>
+		<property name="myprofile">
+			<props>
+				<prop key="birthday">20231223</prop>
+				<prop key="like">잠가기</prop>
+			</props>
+		</property>
+	</bean>
+	
+	
+	<bean id="li1" class="com.shinhan.section02.License">
+		<property name="title" value="정보처리기사"></property>
+		<property name="year" value="2023"></property>
+	</bean>
+	<bean id="li2" class="com.shinhan.section02.License">
+		<property name="title" value="Adsp"></property>
+		<property name="year" value="2022"></property>
+	</bean>
+	<bean id="book1" class="com.shinhan.section02.Book"
+		p:title="이것이 자바다" p:price="30000" p:kind="IT"
+	/>
+	<bean id="book2" class="com.shinhan.section02.Book"
+		p:title="Oracle" p:price="15000" p:kind="IT"
+	/>
+	<bean id="book3" class="com.shinhan.section02.Book"
+		p:title="Mysql" p:price="50000" p:kind="IT"
+	/>
+		
+		
+	<bean id="samsung" class="com.shinhan.section01.SamsungTV">
+	</bean>
+	<bean id="lg" class="com.shinhan.section01.LgTV">
+	</bean>
+	
+	
+	
+	
+</beans>

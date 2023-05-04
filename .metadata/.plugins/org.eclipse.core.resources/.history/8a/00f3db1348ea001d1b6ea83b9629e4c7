@@ -1,0 +1,12 @@
+package com.shinhan.model;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository // @component + DAO
+public class EmpDAO {
+	@Autowired //type이 같으면 주입(injection) --> dbConfiguration.xml에 객체 생성해 놓음. 
+	DataSource ds;
+}

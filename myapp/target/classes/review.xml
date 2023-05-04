@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	
+	<!-- 객체생성은 여기서 -->
+	
+	<!-- 디폴트 생성자 통해 객체 생성(noArgument) -->
+	<bean id="student1" class="com.firstzone.review.Student"></bean>
+	
+	<!-- 생성자를 통해 객체 생성(allArgument) -->
+	<bean id="student2" class="com.firstzone.review.Student">
+		<constructor-arg name="studentName" value="홍길동1"></constructor-arg>
+		<constructor-arg name="studentId" value="1000"></constructor-arg>
+		<constructor-arg name="major" value="컴공"></constructor-arg>
+	</bean>
+	
+	<!-- setter 통해 생성 (noArgument도 있어야 함. 기본생성자(setter는 값만 넣어줄 뿐 객체 생성은 해야 하니깐) -->
+	<bean id="student3" class="com.firstzone.review.Student">
+		<property name="studentId" value="2000"></property>
+		<property name="studentName" value="이솔"></property>
+		<property name="major" value="영어영문"></property>
+	</bean>
+	
+	
+
+</beans>

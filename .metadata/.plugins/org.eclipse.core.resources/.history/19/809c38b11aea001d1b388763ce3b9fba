@@ -1,0 +1,12 @@
+package com.shinhan.education;
+
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+
+@AllArgsConstructor
+@ToString
+public class Car {
+	String model;
+	int price;
+	
+}

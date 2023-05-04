@@ -1,0 +1,86 @@
+package com.firstzone.aop2;
+
+import org.aopalliance.intercept.MethodInterceptor; //이게 around를 같은 의미 
+import org.aopalliance.intercept.MethodInvocation;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
+
+@Component
+@Aspect
+@Order(2)
+public class StopWatchAdvice {
+
+	// pointcut 설정
+	@Pointcut("within(com.firstzone.aop2.Calculator)")
+	public void targetMethod3() {
+
+	}
+
+	// 주업무 수행전
+	@Before("targetMethod3()")
+	public void before(JoinPoint jp) {
+		System.out.println("--------------- StopWatchAdvice before---------------");
+		System.out.println("[StopWatchAdvice  함수이름:  " + jp.getSignature().getName() + " ]");
+		
+	}
+
+	// 주업무의 수행 후
+	@After("targetMethod3()")
+	public void after() {
+		System.out.println("---------------StopWatchAdvice after---------------");
+	}
+
+	// 리턴 후에
+	@AfterReturning("targetMethod3()")
+	public void afterReturn() {
+		System.out.println("---------------StopWatchAdvice @AfterReturning---------------");
+	}
+
+	// 해당 메서드에서 예외 발생 시 실행
+	@AfterThrowing("targetMethod3()")
+	public void afterThrowing() {
+		System.out.println("---------------StopWatchAdvice @AfterThrowing---------------");
+	}
+
+	// 주업무의 전후에 수행
+	@Around("targetMethod3()")
+	public Object aroundTarget2(ProceedingJoinPoint joinPoint) throws Throwable {
+		// 보조업무
+		System.out.println("StopWatchAdvice:[메서드 호출 전" + joinPoint.getSignature().getName());
+		StopWatch watch = new StopWatch("계산시간");
+		watch.start();
+		// 주업무를 수행한다.
+		Object object = joinPoint.proceed();
+		// 보조업무
+		System.out.println("StopWatchAdvice:[메서드 호출 후" + joinPoint.getSignature().getName());
+		watch.stop();
+		System.out.println("주업무 수행 시간:" + watch.getTotalTimeMillis());
+		System.out.println(watch.prettyPrint());
+		return object;
+	}
+
+//	public Object invoke(MethodInvocation invocation) throws Throwable {
+//		// 보조업무
+//		System.out.println("StopWatchAdvice:[메서드 호출 전" + invocation.getMethod());
+//		StopWatch watch = new StopWatch("계산시간");
+//		watch.start();
+//		// 주업무를 수행한다.
+//		Object object = invocation.proceed();
+//		// 보조업무
+//		System.out.println("StopWatchAdvice:[메서드 호출 후" + invocation.getMethod());
+//		watch.stop();
+//		System.out.println("주업무 수행 시간:" + watch.getTotalTimeMillis());
+//		System.out.println(watch.prettyPrint());
+//		return object;
+//	}
+}

@@ -1,0 +1,16 @@
+package com.shinhan.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+public class EmpController {
+	@RequestMapping(value="/insert.do", method = RequestMethod.GET)
+	public String registerGet() {
+		return "emp/empInsert";
+	}
+	
+	@RequestMapping(value="/insert.do", method = RequestMethod.POSTs)
+	public String registerPost() {
+		return "emp/empInsert";
+	}
+}
