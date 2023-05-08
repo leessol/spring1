@@ -1,0 +1,10 @@
+package com.shinhan.controller;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+
+
+//모든 Controller에 Exception이 발생하면 실행된다. 
+@ControllerAdvice
+public class ExceptionAdvice {
+
+}

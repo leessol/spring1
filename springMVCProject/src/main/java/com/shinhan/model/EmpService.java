@@ -7,13 +7,60 @@ import org.springframework.stereotype.Service;
 
 import com.shinhan.vo.EmpVO;
 
-@Service //@Component + service(business)
+//꼭 전달만 하는 것이 아니라 조작하고 controller에 전달할 수 있음. 
+//Service: 업무 로직 (데이터 유효성(보안처리) 등등 / 조작해서 controller에 보내야 한다. 등등 / 접점--> controller가 함수를 어떻게 부를것이며 DAO가 어떻게 접근하고 이런거 정의)
+@Service //@Component + service
 public class EmpService {
 	
-	@Autowired // EmpDAO empDAO = new EmpDAO(); �� ���� �ǹ�
-	EmpDAO empDAO;
-	
-	public List<EmpVO> selectAll() {
-		return empDAO.selectAll();
+	@Autowired //Spring의 타입이 같으면 자동주입
+	EmpDAO empDao;
+
+	// SP 호출
+	public EmpVO getSalary(int empid) {
+		return empDao.getSalary(empid);
 	}
+
+	public List<EmpVO> selectAll() {
+		return empDao.selectAll(); // empDao.selectAll() DAO꺼 호출해서 결과를 controller에 보내야 하니깐 바로 return해버린다.
+	}
+
+	public EmpVO selectById(int empid) {
+		return empDao.selectById(empid);
+	}
+
+	public List<EmpVO> selectByDept(int deptid) {
+		return empDao.selectByDept(deptid);
+	}
+
+	public List<EmpVO> selectByCondition(int deptid, String jobid, double salary) {
+		return empDao.selectByCondition(deptid, jobid, salary);
+	}
+
+	public List<EmpVO> selectLAB() {
+		// controller에 전달하기 전에 조작하는 하고(뭔가 가공) 보낸다.
+		List<EmpVO> empList = empDao.selectLAB();
+		System.out.println("[Controller] 5번 작업: " + empList.size());
+		return empList;
+	}
+
+	// 신규직원등록(insert)
+	public String empInsert(EmpVO emp) {
+		// 뭔가 추가로 처리해야 할 일이 있을 때.
+		// controller로 전달하기 전에 가공하고 보낸다.
+		int result = empDao.empInsert(emp);
+		return result > 0 ? "성공" : "실패";
+	}
+
+	// 수정하기
+	public String empUpdate(EmpVO emp) {
+		int result = empDao.empUpdate(emp);
+		return result > 0 ? "성공" : "실패";
+	}
+
+	// 삭제하기
+	public String empDelete(int empid) {
+		int result = empDao.empDelete(empid);
+		return result > 0 ? "성공" : "실패";
+	}
+
 }

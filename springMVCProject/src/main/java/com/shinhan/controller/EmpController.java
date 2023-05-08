@@ -19,7 +19,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import com.shinhan.model.CompanyService;
 import com.shinhan.model.EmpService;
+import com.shinhan.model.TestEmpService;
 import com.shinhan.vo.EmpVO;
 
 @Controller
@@ -28,29 +30,111 @@ public class EmpController {
 
 	Logger logger = LoggerFactory.getLogger(EmpController.class);
 
-	@Autowired 
+	@Autowired
 	EmpService eService;
+
+	@Autowired
+	CompanyService cService;
+
 	
-	@RequestMapping("/list")
-	public  ModelAndView emplist() {
-		
+
+	@RequestMapping("/emplist.do")
+	public ModelAndView emplist(HttpServletRequest request) {
+
+		Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
+		if (flashMap != null) {
+			Object message = flashMap.get("resultMessage");
+			logger.info("입력/삭제/수정에 대한 결과 message=>" + message);
+		}
+
 		List<EmpVO> emplist = eService.selectAll();
 		logger.info(emplist.size() + "건");
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("empAll", emplist);
+//		mv.addObject("deptList", cService.deptSelectAll());
+//		mv.addObject("jobList", cService.jobSelectAll());
+//		mv.addObject("managerList", cService.managerSelectAll());
+
 		mv.setViewName("emp/empSelect");
 		return mv;
 	}
 	
-	@RequestMapping(value = "/insert.do", method = RequestMethod.GET)
-	public String registerGet(HttpServletRequest request) {
-		Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
-		if (flashMap != null) {
-			Object message = flashMap.get("resultMessage");
-			logger.info("message=>" + message);
-		}
+	@RequestMapping(value = "/empinsert.do", method = RequestMethod.GET)
+	public String registerGet(HttpServletRequest request, Model model) {
+
+		model.addAttribute("deptList", cService.deptSelectAll());
+		model.addAttribute("jobList", cService.jobSelectAll());
+		model.addAttribute("managerList", cService.managerSelectAll());
+
+		// page만 보여줌.
 		return "emp/empInsert";
 	}
+	
+
+	// HTML 폼과 자바빈 객체
+	// Request의 parameter를 읽어서 VO를 new해서 setter수행한다.
+	@RequestMapping(value = "/empinsert.do", method = RequestMethod.POST)
+	public String registerPost(/* @ModelAttribute("emp") */ EmpVO emp, String address, Model model,
+			HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttr) {
+		// @ModelAttribute : view에게 data 전달
+		logger.info("emp : " + emp);
+		logger.info("address : " + address);
+
+		String address2 = request.getParameter("address");
+		String contextPath = request.getContextPath();
+		String method = request.getMethod();
+		String remoteAddr = request.getRemoteAddr(); // 어떤 서버가 나한테 왔는지
+
+		session.setAttribute("userInfo", "세션에 사용자 정보 저장");
+
+		logger.info("contextPath: " + contextPath);
+		logger.info("method: " + method);
+		logger.info("remoteAddr: " + remoteAddr);
+		logger.info("address2: " + address2);
+
+		model.addAttribute("emp2", emp);
+		model.addAttribute("address", address);
+		String result = eService.empInsert(emp);
+
+		// redirect할 때, result의 값도 같이 넘겨준다. 원래는 session에다가 했었음. redirect는 페이지 리로딩이었으니깐.
+		redirectAttr.addFlashAttribute("resultMessage", result);
+
+		return "redirect:/emp/emplist.do";
+		// return "emp/empInsertResult";
+	}
+
+	@RequestMapping(value = "/empDetail.do", method = RequestMethod.GET)
+	public String empDetailGeT(int empid, Model model) {
+		EmpVO emp = eService.selectById(empid);
+		model.addAttribute("deptList", cService.deptSelectAll());
+		model.addAttribute("jobList", cService.jobSelectAll());
+		model.addAttribute("managerList", cService.managerSelectAll());
+		model.addAttribute("emp", emp);
+
+		return "emp/empDetail";
+	}
+
+	@RequestMapping(value = "/empDetail.do", method = RequestMethod.POST)
+	public String empDetailPost(EmpVO emp, RedirectAttributes redirectAttr) {
+		logger.info(emp.toString());
+		String result = eService.empUpdate(emp);
+
+		// redirect할 때, result의 값도 같이 넘겨준다. 원래는 session에다가 했었음. redirect는 페이지 리로딩이었으니깐.
+		redirectAttr.addFlashAttribute("resultMessage", result);
+		return "redirect:/emp/emplist.do";
+	}
+
+	@RequestMapping(value = "/empDelete.do", method = RequestMethod.GET)
+	public String empDetailPost(int empid, RedirectAttributes redirectAttr) {
+		logger.info(empid + "");
+		String result = eService.empDelete(empid);
+		
+		// redirect할 때, result의 값도 같이 넘겨준다. 원래는 session에다가 했었음. redirect는 페이지 리로딩이었으니깐.
+		redirectAttr.addFlashAttribute("resultMessage", result);
+		return "redirect:/emp/emplist.do";
+	}
+
+	// ======================================================================================================================
 
 	// 함수의 return 타입
 	// 1) String : page이름을 return + 재요청(redirect)
@@ -68,10 +152,10 @@ public class EmpController {
 		logger.info("재요청 (redirect)연습");
 		// redirect할때도 값을 전달할 수 있따. 원래는 못했음 새로 고침 개념이라.
 		redirectAttr.addFlashAttribute("resultMessage", "재요청합니다. insert 하세요");
-		return "redirect:/emp/insert.do";
+		return "redirect:/emp/empinsert.do";
 	}
 
-//	@RequestMapping(value = "emp/insert.do", method = RequestMethod.POST)
+//	@RequestMapping(value = "emp/empinsert.do", method = RequestMethod.POST)
 //	public String registerPost(int employee_id, String first_name, String last_name, String email, String phone_number,
 //			int salary, int department_id, int manager_id, String commission_pct, Date hire_date, String job_id) {
 //
@@ -93,7 +177,7 @@ public class EmpController {
 
 	// Map 이용
 	// Request의 parameter를 읽어서 VO를 new해서 setter수행한다.
-//	@RequestMapping(value = "/insert.do", method = RequestMethod.POST)
+//	@RequestMapping(value = "/empinsert.do", method = RequestMethod.POST)
 //	public String registerPost(@RequestParam Map<String, String> map) {
 //
 //		
@@ -107,31 +191,5 @@ public class EmpController {
 //		
 //		return "emp/empInsert.do";
 //	}
-
-	// HTML 폼과 자바빈 객체
-	// Request의 parameter를 읽어서 VO를 new해서 setter수행한다.
-	@RequestMapping(value = "/insert.do", method = RequestMethod.POST)
-	public String registerPost(@ModelAttribute("emp") EmpVO emp, String address, Model model,
-			HttpServletRequest request, HttpSession session) {
-		// @ModelAttribute : view에게 data 전달
-		logger.info("emp : " + emp);
-		logger.info("address : " + address);
-
-		String address2 = request.getParameter("address");
-		String contextPath = request.getContextPath();
-		String method = request.getMethod();
-		String remoteAddr = request.getRemoteAddr(); // 어떤 서버가 나한테 왔는지
-
-		session.setAttribute("userInfo", "세션에 사용자 정보 저장");
-
-		logger.info("contextPath: " + contextPath);
-		logger.info("method: " + method);
-		logger.info("remoteAddr: " + remoteAddr);
-		logger.info("address2: " + address2);
-
-		model.addAttribute("emp2", emp);
-		model.addAttribute("address", address);
-		return "emp/empInsertResult";
-	}
 
 }

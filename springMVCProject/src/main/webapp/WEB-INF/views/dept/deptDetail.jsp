@@ -1,0 +1,81 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>부서상세보기</title>
+<%@ include file="../common/commonfiles.jsp"%>
+
+<style>
+table {
+	border: 1px solid #585858;
+	border-collapse: collapse;
+}
+
+td {
+	padding: 20px;
+	border: 1px solid #585858;
+}
+
+#container {
+	width: 50%;
+	margin: 0 auto;
+}
+
+input[name='email'], input[name='department_id'], input[name='job_id'],
+	input[name='salary'], input[name='manager_id'], input[name='hire_date']
+	{
+	background-color: pink;
+}
+</style>
+
+</head>
+<body>
+
+	<div id="container">
+		<%@ include file="../common/header.jsp"%>
+		<h1>부서 상세보기</h1>
+		<form method="post" action="/dept/deptDetail.do">
+			<table>
+				<tr class="form-floating">
+					<td><label for="department_id">부서번호</label></td>
+					<td><span>${dept.department_id}</span><input class="form-control" type="hidden"
+						name="department_id" id="department_id" value="${dept.department_id}"></td>
+				</tr>
+				<tr>
+					<td>부서명</td>
+					<td><input type="text" name="department_name" value="${dept.department_name}"></td>
+				</tr>
+
+				<tr>
+					<td>메니져</td>
+					<td><select name="manager_id">
+							<c:forEach items="${managerList}" var="manager" varStatus="status">
+								<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
+								<option ${manager.employee_id==dept.manager_id?"selected":""}
+								value="${manager.employee_id}">${manager.first_name}---${manager.last_name}</option>
+							</c:forEach>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td>지역</td>
+					<td><select name="location_id">
+							<c:forEach items="${locationList}" var="location">
+								<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
+								<option ${location.location_id==dept.location_id?"selected":""}
+								value="${location.location_id}">${location.city}</option>
+							</c:forEach>
+					</select></td>
+				</tr>
+
+				<tr>
+					<td colspan="2"><input type="submit" value="부서 등록"></td>
+				</tr>
+
+			</table>
+		</form>
+	</div>
+</body>
+</html>

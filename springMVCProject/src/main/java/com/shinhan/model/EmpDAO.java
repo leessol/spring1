@@ -1,9 +1,13 @@
 package com.shinhan.model;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,16 +16,48 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.shinhan.util.OracleUtil;
 import com.shinhan.vo.EmpVO;
 
-@Repository // @component + DAO
+//DAO (Data Access Object) : DB업무,, crud,, insert, select, update, delete 
+@Repository //@Component + DAO
 public class EmpDAO {
-	@Autowired //type�� ������ ����(injection) --> dbConfiguration.xml�� ��ü ������ ����. 
-	DataSource ds;
 	Connection conn;
-	PreparedStatement st;
-	ResultSet rs;
+	Statement st;
+	PreparedStatement pst; // ?지원
+	CallableStatement cst; //SP지원
+	ResultSet rs; // 결과값 받을 것 --> select만 영향을 끼침
+	int resultCount; // insert, update, delete 건수에 대해서만 결과 값을 받는다.
 	
+	@Autowired //타입이 같으면 자동으로 주입한다. (XML 파일에 bean으로 등록된 bean을 만들어서 자동 주입)
+	DataSource ds;
+	
+	
+	//SP 호출
+	public EmpVO getSalary(int empid) {
+		String sql = "{call sp_salary(?,?,?)}"; // execute sp_salary(101,:sal); 랑 같은것
+		
+		
+		EmpVO emp = new EmpVO();
+		try {
+			conn = ds.getConnection();
+			cst = conn.prepareCall(sql);
+			cst.setInt(1, empid);
+			cst.registerOutParameter(2, Types.DOUBLE);
+			cst.registerOutParameter(3, Types.VARCHAR);
+			cst.execute(); //resultSet이 있으면 true이고 없으면 false
+			//executeQuery ==> select (resultSet 있음), executeUpdate ==> insert, delete, update(resultSet없읍)
+			//execute() 는 executeQuery 와 executeUpdate와 합친것이다. 
+			emp.setSalary(cst.getDouble(2));
+			emp.setFirst_name(cst.getString(3));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return emp;
+	}
+
 	public List<EmpVO> selectAll() {
 		String sql = "select * from employees order by 1 desc";
 		List<EmpVO> empList = new ArrayList<>();
@@ -29,9 +65,14 @@ public class EmpDAO {
 		
 		try {
 			conn = ds.getConnection();
-			st = conn.prepareStatement(sql);
+			st = conn.createStatement();
 			rs = st.executeQuery(sql);
-			//��� ����� �� �ִ�. 
+			//대신 사용할 수 있다. 
+//			ResultSetMetaData meta = rs.getMetaData();
+//			int count = meta.getColumnCount();
+//			for(int i=1; i<=count; i++) {
+//			System.out.println("칼럼이름:" + meta.getColumnName(i));
+//			}
 			while (rs.next()) {
 				EmpVO emp = makeEmp(rs);
 				empList.add(emp);
@@ -39,11 +80,221 @@ public class EmpDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
+			OracleUtil.dbDisconnect(rs, st, conn);
+		}
+
+		return empList;
+	}
+
+	// 자신의 속한 부서의 평균 급여보다 더 적은 급여를 받는 직원들을 조회하시오
+	public List<EmpVO> selectLAB() {
+		// 가져오고 싶은 컬럼 갯수만큼만 아래의 makeEmp2 컬럼을 추가해야한다.
+		// 뭔가 비효율적,,,?
+		String sql = " select employees.salary from employees,(select department_id, avg(salary) sal from employees group by department_id) inlineview_emp where employees.department_id = inlineview_emp.department_id and employees.salary < inlineview_emp.sal ";
+
+		List<EmpVO> empList = new ArrayList<>();
+		
+		try {
+			conn = ds.getConnection();
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			while (rs.next()) {
+				EmpVO emp = makeEmp(rs);
+				empList.add(emp);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(rs, st, conn);
+		}
+
+		return empList;
+	}
+
+	// 특정직원 조회- 한 row
+	public EmpVO selectById(int empid) {
+		EmpVO emp = null;
+		String sql = "select * from employees where employee_id = " + empid;
+
+		
+		try {
+			conn = ds.getConnection();
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+
+			while (rs.next()) {
+				emp = makeEmp(rs);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(rs, st, conn);
+		}
+
+		return emp;
+	}
+
+	// 특정부서 직원만 조회 - 여러건
+	public List<EmpVO> selectByDept(int deptid) {
+		String sql = "select * from employees where department_id = " + deptid;
+		List<EmpVO> empList = new ArrayList<>();
+
+		
+		try {
+			conn = ds.getConnection();
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			while (rs.next()) {
+				EmpVO emp = makeEmp(rs);
+				empList.add(emp);
+			}
+		} catch (SQLException e) {
+			resultCount = -1;
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(rs, st, conn);
+		}
+
+		return empList;
+	}
+
+	// 조건 여러개: deptid, jobid, salary - 여러건
+	public List<EmpVO> selectByCondition(int deptid, String jobid, double salary) {
+		String sql = "select * " + "from employees " + "where department_id = ? " + "and job_id =? "
+				+ "and salary >= ? ";
+		List<EmpVO> empList = new ArrayList<>();
+
+		
+		try {
+			conn = ds.getConnection();
+			pst = conn.prepareStatement(sql);
+
+			// ? 가 무엇인지 알려줘야 한다. --> ? 순서대로
+			pst.setInt(1, deptid);
+			pst.setString(2, jobid);
+			pst.setDouble(3, salary);
+			// --------------------------------------
+
+			rs = pst.executeQuery();
+			while (rs.next()) {
+				EmpVO emp = makeEmp(rs);
+				empList.add(emp);
+			}
+		} catch (SQLException e) {
+			resultCount = -1;
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(rs, pst, conn);
 		}
 
 		return empList;
 	}
 	
+	
+	//신규직원등록(insert)
+	//EmpVO --> 하나하나 컬럼을 매개 인자로 넣는게 아니라 그냥 EmpVO 자체를 들고 다닌다. 
+	//데이터 가방이라고 생각하면 됨. --> 그렇지 않으면 컬럼이 만약 몇십개가 되면 하나하나 개별로 들고 다녀야 함. 
+	public int empInsert(EmpVO emp) {
+		String sql = 
+					"insert into employees"
+					+ " values (seq_employee.nextval,?,?,?,?,?,?,?,?,?,?)"
+				;
+		
+	
+		try {
+			conn = ds.getConnection();
+			pst = conn.prepareStatement(sql);
+			//prepareStatement 사용하면 바로 ? 가 누군지 지정!!! --> 한세트라고 생각해라
+			pst.setString(1, emp.getFirst_name()); //매개인자로 들어온 emp에서 get(읽어서)해서 set하는 것이다. 
+			pst.setString(2, emp.getLast_name()); 
+			pst.setString(3, emp.getEmail());  
+			pst.setString(4, emp.getPhone_number());  
+			pst.setDate(5, emp.getHire_date());  
+			pst.setString(6, emp.getJob_id());  
+			pst.setDouble(7, emp.getSalary());  
+			pst.setDouble(8, emp.getCommission_pct());  
+			pst.setInt(9, emp.getManager_id());  
+			pst.setInt(10, emp.getDepartment_id()); 
+			  
+			resultCount = pst.executeUpdate(); //selct 빼고는 다 executeUpdate라고 하면된다. 
+			//DML 문장을 실행한다. 영향 받은 건수가 return
+			//select 뺴고 insert/update/delete은 원래 자체가 수정한 건수를 리턴한다. 
+			//그래서 리턴타이 int인것이고, resultCount를 사용하는 것이다. 
+		} catch (SQLException e) {
+			resultCount = -1;
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(null, pst, conn);
+		}
+		
+		return resultCount;
+	}
+	
+	
+	//직원정보 수정
+	public int empUpdate(EmpVO emp) {
+		String sql = 
+					"update employees set email =?, department_id =?,job_id =?, salary=? where employee_id =? "; //시그니쳐는 안바뀌고 안에 내용물만 바꾸어야 한다. 
+		
+		
+		try {
+			conn = ds.getConnection();
+			pst = conn.prepareStatement(sql);
+			//prepareStatement 사용하면 바로 ? 가 누군지 지정!!! --> 한세트라고 생각해라
+			
+			pst.setString(1, emp.getEmail());  
+			pst.setInt(2, emp.getDepartment_id());  
+			pst.setString(3, emp.getJob_id());  
+			pst.setDouble(4, emp.getSalary());
+			pst.setInt(5, emp.getEmployee_id());
+			
+			  
+			resultCount = pst.executeUpdate(); //selct 빼고는 다 executeUpdate라고 하면된다. 
+			//DML 문장을 실행한다. 영향 받은 건수가 return
+			//select 뺴고 insert/update/delete은 원래 자체가 수정한 건수를 리턴한다. 
+			//그래서 리턴타이 int인것이고, resultCount를 사용하는 것이다. 
+			System.out.println("update 결과: "+resultCount);
+		} catch (SQLException e) {
+			resultCount = -1;
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(null, pst, conn);
+		}
+		
+		return resultCount;
+	}
+	
+	
+	//한건의 직원을 삭제하기
+	public int empDelete(int empid) {
+		String sql = " delete from employees where employee_id = ? "; //시그니쳐는 안바뀌고 안에 내용물만 바꾸어야 한다. 
+		
+		
+		try {
+			conn = ds.getConnection();
+			pst = conn.prepareStatement(sql);
+			//prepareStatement 사용하면 바로 ? 가 누군지 지정!!! --> 한세트라고 생각해라
+			
+			pst.setInt(1, empid);  
+			
+			resultCount = pst.executeUpdate(); //selct 빼고는 다 executeUpdate라고 하면된다. 
+			//DML 문장을 실행한다. 영향 받은 건수가 return
+			//select 뺴고 insert/update/delete은 원래 자체가 수정한 건수를 리턴한다. 
+			//그래서 리턴타이 int인것이고, resultCount를 사용하는 것이다. 
+			
+		} catch (SQLException e) {
+			resultCount = -1;
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(null, pst, conn);
+		}
+		System.out.println("delete 결과: "+resultCount);
+		return resultCount;
+	}
+	
+	
+	//--------------------------------------------------------------------------------
+
 	private EmpVO makeEmp(ResultSet rs2) throws SQLException {
 		EmpVO emp = new EmpVO();
 		emp.setCommission_pct(rs.getDouble("Commission_pct"));
@@ -62,5 +313,14 @@ public class EmpDAO {
 		return emp;
 	}
 
+	private EmpVO makeEmp2(ResultSet rs2) throws SQLException {
+		EmpVO emp = new EmpVO();
+		emp.setDepartment_id(rs.getInt("Department_id"));
+		emp.setEmail(rs.getString("Email"));
+		emp.setPhone_number(rs.getString("Phone_number"));
+		emp.setSalary(rs.getDouble("Salary"));
+
+		return emp;
+	}
 
 }

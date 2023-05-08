@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+// DispatcherServlet (Front Controller)가 요청을 맡아 Controller를 찾음
 @Controller
 @RequestMapping("/first") //class-level 아래의 메소드 레벨의 요청들의 공통사항
 public class SampleController {

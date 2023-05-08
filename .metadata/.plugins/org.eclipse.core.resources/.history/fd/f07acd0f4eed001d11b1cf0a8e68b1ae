@@ -1,0 +1,90 @@
+
+<%@page import="com.shinhan.vo.EmpVO"%>
+<%@page import="java.util.List"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<style>
+#container {
+	
+}
+
+table {
+	border: 1px solid #585858;
+	margin: 0 auto;
+}
+
+h1 {
+	font-size: 20;
+	text-align: center;
+}
+
+th, td {
+	padding: 20px;
+	text-align: center;
+}
+
+th {
+	color: white;
+}
+
+td {
+	background-color: #F2F2F2;
+}
+
+tr th {
+	background-color: #848484;
+}
+</style>
+
+<script>
+	
+</script>
+</head>
+<body>
+	<div id="container">
+		<h1>부서목록</h1>
+		
+		
+		<table>
+			<thead>
+				<tr>
+					<th>순서</th>
+					<th>부서번호</th>
+					<th>부서명</th>
+					<th>매니져_id</th>
+					<th>location_id</th>
+					<th><button>삭제</button></th>
+				</tr>
+			</thead>
+			<tbody>
+				<c:forEach items="${empAll}" var="emp" varStatus="status">
+				
+					<tr>
+						<td style="background-color:${status.first||status.last?'orange':'pink'};">${status.count}</td>
+						<td><a href="${path}/emp/deptDetail.do?deptid=${emp.employee_id}">${emp.employee_id}</a></td>
+						<td><a style="color:${fn:length(emp.first_name)>3?'red':'blue'};" href="${path}/emp/empDetail.do?empid=${emp.employee_id}">${emp.first_name}</a></td>
+						<td>${emp.last_name}</td>
+						<td>${emp.email}${fn:substring(emp.email,0,3)}**
+							${fn:indexOf(emp.email,"@")}**
+							${fn:indexOf(emp.email,"@")>=0?fn:substring(emp.email,0,3):emp.email}
+						</td>
+						<td><button class="btnDel" data-del="${emp.employee_id}">삭제</button></td>
+					</tr>
+
+			
+
+
+				
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+package com.shinhan.controller;
+
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+
+//모든 Controller에 Exception이 발생하면 실행된다. 
+@ControllerAdvice
+public class ExceptionAdvice {
+	
+	Logger logger = LoggerFactory.getLogger(ExceptionAdvice.class);
+	
+	
+	@ExceptionHandler(Exception.class) //모든 exception 다 받겠다. arith, numberformat등등등 ahems
+	public String processException(Exception ex) {
+		logger.info(ex.getClass().getName());
+		return "/error/error500";				
+	}
+}

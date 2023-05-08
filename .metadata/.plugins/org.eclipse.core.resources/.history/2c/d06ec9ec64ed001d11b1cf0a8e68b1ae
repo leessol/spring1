@@ -1,0 +1,37 @@
+package com.shinhan.model;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.shinhan.vo.DeptVO;
+import com.shinhan.vo.EmpVO;
+
+@Service
+public class DeptService {
+	
+	@Autowired
+	DeptDAO dao;
+	
+	
+	public List<DeptVO> deptSelectAll() {
+		return dao.deptSelectAll();
+	}
+	
+	public String deptInsert(DeptVO dept) {
+		int result = dao.deptInsert(dept);
+		return result > 0? "성공" : "실패";
+	}
+	
+	
+	public DeptVO selectById(int deptid) {
+		return dao.selectById(deptid);
+	}
+	
+	public String deptUpdate(EmpVO emp) {
+		int result = dao.empUpdate(emp);
+		return result > 0 ? "성공" : "실패";
+	}
+	
+}

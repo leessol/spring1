@@ -1,0 +1,57 @@
+package com.shinhan.controller;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.shinhan.model.DeptService;
+import com.shinhan.vo.DeptVO;
+
+@Controller
+@RequestMapping("/dept")
+public class DeptController {
+	
+	@Autowired
+	DeptService dService;
+	
+	Logger logger = LoggerFactory.getLogger(EmpController.class);
+	
+	@RequestMapping(value="/deptList.do", method=RequestMethod.GET)
+	public String deptList(Model model) {
+		
+		List<DeptVO> deptList = dService.deptSelectAll();
+		model.addAttribute("deptAll",deptList);
+		
+		return "dept/deptSelect";
+	}
+	
+	
+	@RequestMapping(value="/deptInsert.do", method=RequestMethod.GET)
+	public String deptInsertGet(Model model) {
+		
+		/*
+		 * List<DeptVO> deptList = dService.deptSelectAll();
+		 * model.addAttribute("deptAll",deptList);
+		 */
+		model.addAttribute("deptList", cService.deptSelectAll());
+		return "dept/deptInsert";
+	}
+	
+	@RequestMapping(value="/deptInsert.do", method=RequestMethod.POST)
+	public String deptInsertPost() {
+		
+		/*
+		 * List<DeptVO> deptList = dService.deptSelectAll();
+		 * model.addAttribute("deptAll",deptList);
+		 */
+		
+		return "dept/deptSelect";
+	}
+
+}

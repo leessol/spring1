@@ -14,7 +14,7 @@
 //형변환 해야한다. 왜냐면 오르쪽은 그냥 object 타입이어서. (object(부모)에서 자식으로 강제 형변환)
 //view이다 자바를 하면 안된다. --> 원래는 html만 있어야 한다. 
 //MVC1모델 servlet(controller)가 view를 안 거치고 바로 client에 뿌려주는 것이다. 이렇게 하면 안됨. 
-List<EmpVO> empList = (List<EmpVO>) request.getAttribute("empAll");//request.setAttribute("empAll", emplist); 서블릿 페이지에서 세팅을 한것을 받는 것이다.
+//List<EmpVO> empList = (List<EmpVO>) request.getAttribute("empAll");//request.setAttribute("empAll", emplist); 서블릿 페이지에서 세팅을 한것을 받는 것이다.
 %>
 <!DOCTYPE html>
 <html>
@@ -22,7 +22,7 @@ List<EmpVO> empList = (List<EmpVO>) request.getAttribute("empAll");//request.set
 <meta charset="UTF-8">
 <title>Insert title here</title>
 
-<%-- <jsp:include page="${path}/common/commonfiles.jsp"></jsp:include> --%>
+<%@ include file="../common/commonfiles.jsp"%>
 <style>
 #container {
 	
@@ -59,8 +59,8 @@ tr th {
 <script>
 	$(function() {
 		$(".btnDel").on("click", function() {
-
-			location.href = "empDelete.do?empid=" + $(this).attr("data-del"); //get 방식
+			console.log("Sss");
+			location.href = "${path}/emp/empDelete.do?empid=" + $(this).attr("data-del"); //get 방식
 		});
 	});
 
@@ -103,21 +103,25 @@ tr th {
 		<!-- include 지시자: 합쳐서 컴파일한다. include 디렉티브는 소스를 합쳐서 컴파일한다.  -->
 		<%-- <%@ include file="../common/header.jsp" %> --%>
 		<!-- include action tag 이용: 컴파일하고 합침 -->
-		
+
 		<button id="my1">짝수직원보여주기</button>
 		<button onclick="location.href='${path}/emp/empinsert.do'"
 			type="button" class="btn btn-outline-success">직원등록(버튼, 상대)</button>
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Modal 이용 직원등록</button>
-			
+		<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+			data-bs-target="#exampleModal" data-bs-whatever="@mdo">Modal
+			이용 직원등록</button>
+		<button onclick="location.href='/dept/deptList.do'"
+			type="button" class="btn btn-success">부서 조회</button>
+
 		<hr>
 
-		<form method="post" action="${path }/downloadTest/result.jsp" >
+		<form method="post" action="${path }/downloadTest/result.jsp">
 			<!-- 이름이 가는 것이다.  -->
 			<input type=hidden name="param1" value="watch.jpg" /> <br> <input
 				type=hidden name="param2" value="umbrella.jpg" /> <br> <input
 				type="submit" value="이미지 다운로드">
 		</form>
-		
+
 
 		<table>
 			<thead>

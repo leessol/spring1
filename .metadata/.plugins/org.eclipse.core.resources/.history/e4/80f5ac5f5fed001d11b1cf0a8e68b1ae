@@ -1,0 +1,87 @@
+package com.shinhan.model;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.shinhan.util.OracleUtil;
+import com.shinhan.vo.DeptVO;
+
+@Repository
+public class DeptDAO {
+
+	Connection conn;
+	Statement st;
+	PreparedStatement pst;
+	CallableStatement cst;
+	ResultSet rs;
+	@Autowired
+	DataSource ds;
+
+	// 부서 전부 조회
+	public List<DeptVO> deptSelectAll() {
+		List<DeptVO> deptList = new ArrayList<>();
+		String sql = "select * from departments order by 1";
+
+		try {
+			conn = ds.getConnection();
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			while (rs.next()) {
+				DeptVO dept = new DeptVO();
+				dept.setDepartment_id(rs.getInt("Department_id"));
+				dept.setDepartment_name(rs.getString("Department_name"));
+				dept.setLocation_id(rs.getInt("Location_id"));
+				dept.setManager_id(rs.getInt("Manager_id"));
+				deptList.add(dept);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(rs, st, conn);
+		}
+		return deptList;
+
+	}
+	
+	//부서 insert
+	public String deptInsert(DeptVO dept) {
+		String sql = 
+				"insert into departments"
+				+ " values (seq_department.nextval,?,?,?) ";
+		
+		try {
+			conn = ds.getConnection();
+			pst = conn.prepareStatement(sql);
+			//prepareStatement 사용하면 바로 ? 가 누군지 지정!!! --> 한세트라고 생각해라
+			pst.setString(1, dept.getFirst_name()); //매개인자로 들어온 emp에서 get(읽어서)해서 set하는 것이다. 
+			pst.setString(2, dept.getLast_name()); 
+			pst.setString(3, dept.getEmail());  
+			
+			resultCount = pst.executeUpdate(); //selct 빼고는 다 executeUpdate라고 하면된다. 
+			//DML 문장을 실행한다. 영향 받은 건수가 return
+			//select 뺴고 insert/update/delete은 원래 자체가 수정한 건수를 리턴한다. 
+			//그래서 리턴타이 int인것이고, resultCount를 사용하는 것이다. 
+		} catch (SQLException e) {
+			resultCount = -1;
+			e.printStackTrace();
+		} finally {
+			OracleUtil.dbDisconnect(null, pst, conn);
+		}
+		
+		return resultCount;
+		
+		return null;
+	}
+}

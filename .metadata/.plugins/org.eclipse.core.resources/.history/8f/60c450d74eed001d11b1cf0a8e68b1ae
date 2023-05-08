@@ -1,0 +1,41 @@
+package com.shinhan.model;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.shinhan.util.OracleUtil;
+import com.shinhan.vo.DeptVO;
+
+@Repository
+public class DeptDAO {
+	// 부서 전부 조회
+		public List<DeptVO> deptSelectAll() {
+			List<DeptVO> deptList = new ArrayList<>();
+			String sql = "select * from departments order by 1";
+			
+
+			try {
+				conn = ds.getConnection();
+				st = conn.createStatement();
+				rs = st.executeQuery(sql);
+				while (rs.next()) {
+					DeptVO dept = new DeptVO();
+					dept.setDepartment_id(rs.getInt("Department_id"));
+					dept.setDepartment_name(rs.getString("Department_name"));
+					dept.setLocation_id(rs.getInt("Location_id"));
+					dept.setManager_id(rs.getInt("Manager_id"));
+					deptList.add(dept);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				OracleUtil.dbDisconnect(rs, st, conn);
+			}
+			return deptList;
+
+		}
+}
