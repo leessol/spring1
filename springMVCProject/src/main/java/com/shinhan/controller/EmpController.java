@@ -1,5 +1,7 @@
 package com.shinhan.controller;
 
+
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +23,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 import com.shinhan.model.CompanyService;
 import com.shinhan.model.EmpService;
-import com.shinhan.model.TestEmpService;
 import com.shinhan.vo.EmpVO;
 
 @Controller
@@ -47,16 +48,32 @@ public class EmpController {
 			logger.info("입력/삭제/수정에 대한 결과 message=>" + message);
 		}
 
-		List<EmpVO> emplist = eService.selectAll();
+		List<EmpVO> emplist = eService.selectByCondition(new Integer [] {},null, null, null);
 		logger.info(emplist.size() + "건");
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("empAll", emplist);
+		mv.addObject("deptList", cService.deptSelectAll());
+		mv.addObject("jobList", cService.jobSelectAll());
+		
 //		mv.addObject("deptList", cService.deptSelectAll());
 //		mv.addObject("jobList", cService.jobSelectAll());
 //		mv.addObject("managerList", cService.managerSelectAll());
 
 		mv.setViewName("emp/empSelect");
 		return mv;
+	}
+	
+	//필터링
+	//@RequestMapping(value = "/empCondition.do", method=RequestMethod.GET)
+	//Ajax 요청 시 배열이 오면 @RequestParam("deptid[]")
+	//일반요청이면 @RequestParam("deptid") Integer [] deptid
+	//일반요청이면 Integer [] deptid 
+	//
+	@PostMapping("/empCondition.do")
+	public String selectByCondition(@RequestParam("deptid[]") Integer [] deptid, String jobid, Double salary, Date hireDate, Model model) {
+		List<EmpVO> emplist = eService.selectByCondition(deptid, jobid, salary, hireDate);
+		model.addAttribute("empAll",emplist);
+		return "emp/empRetrieve";
 	}
 	
 	@RequestMapping(value = "/empinsert.do", method = RequestMethod.GET)
@@ -133,6 +150,11 @@ public class EmpController {
 		redirectAttr.addFlashAttribute("resultMessage", result);
 		return "redirect:/emp/emplist.do";
 	}
+	
+
+	
+
+
 
 	// ======================================================================================================================
 

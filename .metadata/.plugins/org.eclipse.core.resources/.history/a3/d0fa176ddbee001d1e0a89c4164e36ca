@@ -1,0 +1,8 @@
+package com.shinhan.model;
+
+import org.springframework.stereotype.Service;
+
+@Service //@component + service
+public class AccountService {
+	
+}

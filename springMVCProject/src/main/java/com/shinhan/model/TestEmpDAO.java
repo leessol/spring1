@@ -10,6 +10,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import com.shinhan.vo.EmpVO;
@@ -17,6 +18,7 @@ import com.shinhan.vo.EmpVO;
 @Repository // @component + DAO
 public class TestEmpDAO {
 	@Autowired //type이 같으면 주입(injection) --> dbConfiguration.xml에 객체 정의해 놓음. 
+	@Qualifier("dataSourceOriginal") //타입이 같은 bean이 여러개이면 이름으로 찾아서 주입한다. 
 	DataSource ds;
 	Connection conn;
 	PreparedStatement st;

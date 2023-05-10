@@ -1,0 +1,14 @@
+package com.shinhan.model;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class AccountDAO {
+	
+	@Autowired
+	SqlSession sqlSession;
+
+	static final String namespace = "co.kr.firstzone.account";
+}

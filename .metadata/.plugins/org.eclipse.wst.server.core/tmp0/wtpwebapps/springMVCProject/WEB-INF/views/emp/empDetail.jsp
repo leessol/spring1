@@ -36,7 +36,7 @@ input[name='email'], input[name='department_id'], input[name='job_id'],
 	<div id="container">
 		<%@ include file="../common/header.jsp"%>
 		<h1>직원상세보기</h1>
-		<form method="post"
+		<form id="myfrm" method="post"
 			action="<%=request.getContextPath()%>/emp/empDetail.do">
 			<table>
 				<tr class="form-floating">
@@ -71,6 +71,7 @@ input[name='email'], input[name='department_id'], input[name='job_id'],
 				<tr>
 					<td>부서</td>
 					<td><select name="department_id">
+							<option value="0">선택안함</option>
 							<c:forEach items="${deptList}" var="dept" varStatus="status">
 								<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
 								<option ${emp.department_id==dept.department_id?"selected":""}
@@ -81,6 +82,7 @@ input[name='email'], input[name='department_id'], input[name='job_id'],
 				<tr>
 					<td>메니져</td>
 					<td><select name="manager_id">
+							<option value="0">선택안함</option>
 							<c:forEach items="${managerList}" var="manager">
 								<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
 								<option ${emp.manager_id==manager.employee_id?"selected":""}
@@ -109,9 +111,36 @@ input[name='email'], input[name='department_id'], input[name='job_id'],
 				</tr>
 				<tr>
 					<td colspan="2"><input type="submit" value="직원정보수정"></td>
+					<td colspan="2"><input id="btnRestUpdate" type="button" value="직원정보수정(rest)"></td>
+					
+					
 				</tr>
 			</table>
 		</form>
 	</div>
 </body>
+<script>
+	$(function(){
+		$('#btnRestUpdate').click(function(){
+			var arr = $('#myfrm').serializeArray();
+			var obj = {};
+			
+			$.each(arr,function (idx,item){
+				obj[item.name] = item.value;
+			});
+			$.ajax({
+				url: "/restemp/empDetail.do",
+				method: "put",
+				data: JSON.stringify(obj), // @RequestBody 부분에 들어가는 것이다.  
+				contentType: "application/json",
+				success: function(r){
+					console.log(r);
+				},
+				error: function(r){
+					console.log(r)
+				}
+			}); 
+		});
+	});
+</script>
 </html>

@@ -1,0 +1,23 @@
+package com.shinhan.model;
+
+import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class AccountDAOMybatis {
+	
+	@Autowired
+	SqlSession sqlSession;
+
+	static final String NAMESPACE = "co.kr.firstzone.account";
+	
+	static final Logger LOG = LoggerFactory.getLogger(AccountDAOMybatis.class);
+	
+	public void update1() {
+		
+	}
+
+}

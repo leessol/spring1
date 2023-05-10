@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.firstzone.emp">
+	<select id="selectAll" resultType="com.shinhan.vo.EmpVO">
+		select * from employees order by 1 desc
+	</select>
+
+	<select id="selectById" parameterType="int" resultType="empvo">
+		select * from employees where employee_id = #{empid}
+	</select>
+
+	<select id="selectByDept" parameterType="int" resultType="deptvo">
+		select * from employees where employee_id = #{deptid}
+	</select>
+
+
+</mapper>

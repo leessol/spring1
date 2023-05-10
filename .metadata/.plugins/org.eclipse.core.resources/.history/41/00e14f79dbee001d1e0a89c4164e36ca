@@ -1,0 +1,11 @@
+package com.shinhan.model;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service //@component + service
+public class AccountService {
+	
+	@Autowired
+	AccountDAOMybatis dao;
+}

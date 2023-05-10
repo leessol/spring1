@@ -1,0 +1,9 @@
+package com.shinhan.model;
+
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class AccountDAO {
+	
+	
+}

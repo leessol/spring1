@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- configuration: root element 이다. configuration 으로 시작해서 끝나야 한다. -->
+<!DOCTYPE configuration 
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+		<settings>
+			<setting name="logImpl" value="LOG4J" />
+			<setting name="jdbcTypeForNull" value="NULL" />
+		</settings>
+		<typeAliases>
+			<typeAlias type="com.shinhan.vo.DeptVO" alias="deptvo" />
+			<typeAlias type="com.shinhan.vo.EmpVO" alias="empvo" />
+		</typeAliases>
+	
+
+	<!-- //db연결하는 코드: spring이 할것 
+	<environments default="development"> <environment 
+		id="development"> <transactionManager type="JDBC"/> <dataSource type="POOLED"> 
+		<property name="driver" value="${driver}"/> <property name="url" value="${url}"/> 
+		<property name="username" value="${username}"/> <property name="password" 
+		value="${password}"/> </dataSource> </environment> </environments> -->
+
+	<!-- spring이 할것이다. 
+	<mappers> <mapper resource="org/mybatis/example/BlogMapper.xml"/> 
+		</mappers> -->
+		
+		
+</configuration>

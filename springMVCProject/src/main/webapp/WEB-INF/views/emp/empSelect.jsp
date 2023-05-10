@@ -58,10 +58,13 @@ tr th {
 
 <script>
 	$(function() {
-		$(".btnDel").on("click", function() {
-			console.log("Sss");
-			location.href = "${path}/emp/empDelete.do?empid=" + $(this).attr("data-del"); //get 방식
-		});
+		$(".btnDel").on(
+				"click",
+				function() {
+					console.log("Sss");
+					location.href = "${path}/emp/empDelete.do?empid="
+							+ $(this).attr("data-del"); //get 방식
+				});
 	});
 
 	$(function() {
@@ -96,9 +99,22 @@ tr th {
 		//#container > table > tbody > tr:nth-child(1) > td:nth-child(2)
 	});
 </script>
+
+
 </head>
 <body>
 	<div id="container">
+	
+		<!-- restful 방식 연습 -->
+		<input type="number" id="empid" value="100"/>
+		<button id="empRetrive">1건의 직원 조회</button>
+		
+		<button id="empAll">모든 직원 조회</button>
+		<div id = "resultMessage1"></div>
+		
+		<hr>
+		
+
 		<h1>직원목록</h1>
 		<!-- include 지시자: 합쳐서 컴파일한다. include 디렉티브는 소스를 합쳐서 컴파일한다.  -->
 		<%-- <%@ include file="../common/header.jsp" %> --%>
@@ -110,8 +126,8 @@ tr th {
 		<button type="button" class="btn btn-primary" data-bs-toggle="modal"
 			data-bs-target="#exampleModal" data-bs-whatever="@mdo">Modal
 			이용 직원등록</button>
-		<button onclick="location.href='/dept/deptList.do'"
-			type="button" class="btn btn-success">부서 조회</button>
+		<button onclick="location.href='/dept/deptList.do'" type="button"
+			class="btn btn-success">부서 조회</button>
 
 		<hr>
 
@@ -121,8 +137,38 @@ tr th {
 				type=hidden name="param2" value="umbrella.jpg" /> <br> <input
 				type="submit" value="이미지 다운로드">
 		</form>
-
-
+		
+		<div>
+		<form class="form-inline justify-content-center my-5" >
+				<div class="d-flex">
+					<select id="deptid" multiple="multiple"
+						class="btn btn-outline-secondary">
+						<option value="">전체</option>
+						<c:forEach items="${deptList}" var="dept" varStatus="status">
+							<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
+							<option value="${dept.department_id}">${status.count}.
+								${dept.department_name}</option>
+						</c:forEach>
+					</select> <select id="jobid" multiple="multiple"
+						class="btn btn-outline-secondary">
+						<option value="">전체</option>
+						<c:forEach items="${jobList}" var="job">
+							<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
+							<option value="${job.job_id}">${job.job_title}</option>
+						</c:forEach>
+					</select> 
+					<div class="input-group mb-3"> 
+					<div class="col-xs-4">
+						<input type="text" class="form-control " id="salary" placeholder="급여"/></div><span>이상</span> 
+						<input type="date" id="hireDate"  />
+						<input class="btn my-2 my-sm-0 mx-2 bg-primary text-white" type="button" id="searchEmp" />
+					</div>
+				</div>
+			
+			
+		</form>
+		
+		</div>
 		<table>
 			<thead>
 				<tr>
@@ -142,7 +188,9 @@ tr th {
 					<th><button>삭제</button></th>
 				</tr>
 			</thead>
-			<tbody>
+			
+			<tbody id="showList">
+			
 				<!-- 
 						<향상된 forEach>
 						--for(EmpVO emp: empAll) //이것이랑 같은 의미 
@@ -178,34 +226,77 @@ tr th {
 								value="${emp.commission_pct}"></fmt:formatNumber></td>
 						<td>${emp.department_id}</td>
 						<td><button class="btnDel" data-del="${emp.employee_id}">삭제</button></td>
+						<td><button class="btnDelRest" data-del="${emp.employee_id}">삭제(rest)</button></td>
 					</tr>
 
 				</c:forEach>
 
 
-				<%-- <%
-				for (EmpVO emp : empList) {
-				%>
-				<tr>
-					<td><a href="empDetail.do?empid=<%=emp.getEmployee_id()%>"><%=emp.getEmployee_id()%></a></td>
-					<td><a href="empDetail.do?empid=<%=emp.getEmployee_id()%>"><%=emp.getFirst_name()%></a></td>
-					<td><%=emp.getLast_name()%></td>
-					<td><%=emp.getEmail()%></td>
-					<td><%=emp.getSalary()%></td>
-					<td><%=emp.getHire_date()%></td>
-					<td><%=emp.getPhone_number()%></td>
-					<td><%=emp.getJob_id()%></td>
-					<td><%=emp.getManager_id()%></td>
-					<td><%=emp.getCommission_pct()%></td>
-					<td><%=emp.getDepartment_id()%></td>
-					<td><button class="btnDel" data-del="<%=emp.getEmployee_id()%>">삭제</button></td>
-
-				</tr>
-				<%
-				}
-				%> --%>
+				
 			</tbody>
 		</table>
+		
 	</div>
 </body>
+<script>
+$(function(){
+	$('#searchEmp').on('click',function(){
+		console.log($('#deptid').val());
+		$.ajax({
+			url: "/emp/empCondition.do",
+			method: "post",
+			data: {"deptid":$('#deptid').val(),"jobid":$('#jobid').val(),"salary":$('#salary').val(),
+				"hireDate":$('#hireDate').val()|| undefined
+				},
+			success: function(r){
+				$('#showList').html(r);
+			}
+		});	
+	
+	});
+})
+</script>
+<script type="text/javascript">
+	$(function(){
+		$('#empRetrive').click(function(){
+			var empid = $('#empid').val();
+			$.ajax({
+				url: "/restemp/empDetail.do/"+empid, //값만 들어간다. data 부분이 없음 restful은 
+				success: function(r){
+					console.log(r);
+					$('#resultMessage1').html(r.first_name);
+				},
+				error: function(){}
+			});
+		});
+		
+		$('#empAll').click(function(){
+			$.ajax({
+				url: "/restemp/emplist.do/", //값만 들어간다. data 부분이 없음 restful은 
+				success: function(r){
+					var output = "<ul>";
+					$.each(r,function(index,item){
+						output += "<li>" + item.first_name + "</li>";
+					});
+					$('#resultMessage1').html(output + "</ul>");
+				},
+				error: function(){}
+			});
+		});
+		
+		$('.btnDelRest').click(function(){
+			var empid = $(this).attr("data-del");
+			$.ajax({
+				url:"/restemp/empDelete.do/"+empid,
+				method : "delete",
+				success:function(r){
+					alert(r);
+					location.href="/emp/emplist.do";
+				},
+				error: function(){}
+			});
+		});
+	});
+
+</script>
 </html>

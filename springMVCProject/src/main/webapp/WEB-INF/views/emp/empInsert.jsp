@@ -30,7 +30,7 @@ td {
 
 
 
-<form method="post" action="<%=request.getContextPath()%>/emp/empinsert.do">
+<form method="post" action="<%=request.getContextPath()%>/emp/empinsert.do" id="myfrm">
 <table>
   <tr  class="form-floating">
     <td><label for="employee_id">직원번호</label></td>
@@ -71,6 +71,7 @@ td {
     <td>부서</td>
     <td>
     <select name="department_id">
+    	<option value="0">선택안함</option>
     	<c:forEach items="${deptList}" var="dept">
     		<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
     		<option value="${dept.department_id}">${dept.department_name}</option>
@@ -82,6 +83,7 @@ td {
     <td>메니져</td>
     <td>
     <select name="manager_id">
+    	<option value="0">선택안함</option>
     	<c:forEach items="${managerList}" var="manager">
     		<!-- 디비에 들어가는 것은 id값이 들어가야 하니깐 value에는 id로 한다.  -->
     		<option value="${manager.employee_id}">${manager.first_name}---${manager.last_name}</option>
@@ -111,9 +113,34 @@ td {
   <tr>
     <td colspan="2">
        <input type="submit" value="직원등록">
+       <input id="btnRestInsert" type="button" value="직원등록(Rest)">
     </td>
   </tr>
 </table>
 </form>
 </body>
+<script>
+	$(function(){
+		$('#btnRestInsert').click(function(){
+			var arr = $('#myfrm').serializeArray();
+			var obj = {};
+			
+			$.each(arr,function (idx,item){
+				obj[item.name] = item.value;
+			});
+			$.ajax({
+				url: "/restemp/empinsert.do",
+				method: "post",
+				data: JSON.stringify(obj), // @RequestBody 부분에 들어가는 것이다.  
+				contentType: "application/json",
+				success: function(r){
+					console.log(r);
+				},
+				error: function(r){
+					console.log(r)
+				}
+			});
+		});
+	});
+</script>
 </html>

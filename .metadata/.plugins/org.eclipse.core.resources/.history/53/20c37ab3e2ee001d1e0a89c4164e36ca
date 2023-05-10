@@ -1,0 +1,42 @@
+package com.shinhan.education;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+
+@Component
+@Aspect
+public class LoggingAdvice {
+
+	/* @Pointcut("execution(* print()) || execution(* *(String))") */
+	@Pointcut("execution(* print(..))")
+	public void loggingAdvice() {}
+	
+	
+	@Pointcut("execution(* *Info())")
+	public void loggingAdvice2() {}
+	
+	@Around("loggingAdvice2()")
+	public Object aroundTarget2(ProceedingJoinPoint joinPoint) throws Throwable {
+		Object obj = joinPoint.proceed(); // ì£¼ì—…ë¬? ?ˆ˜?–‰
+		return obj; // ì£¼ì—…ë¬? ê²°ê³¼ ë¦¬í„´
+	}
+
+	@Around("loggingAdvice()")
+	public Object aroundTarget(ProceedingJoinPoint joinPoint) throws Throwable {
+
+		// ì£? ?—…ë¬? ? „
+		System.out.println("[LoggingAdvice ì£? ?—…ë¬? ? „?— ?ˆ˜?–‰: class ?´ë¦?  ==> ] " + joinPoint.getTarget().getClass().getName() + "ë©”ì„œ?“œ");
+
+		Object obj = joinPoint.proceed(); // ì£¼ì—…ë¬? ?ˆ˜?–‰
+
+		// ì£? ?—…ë¬? ?›„
+		System.out.println("[LoggingAdvice ì£? ?—…ë¬? ?›„?— ?ˆ˜?–‰: ?•¨?ˆ˜ ?´ë¦?  ==> ] " + joinPoint.getSignature().getName() + "ë©”ì„œ?“œ");
+
+		return obj; // ì£¼ì—…ë¬? ê²°ê³¼ ë¦¬í„´
+	}
+	
+	
+}

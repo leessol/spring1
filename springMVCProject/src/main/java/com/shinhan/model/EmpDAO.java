@@ -14,6 +14,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import com.shinhan.util.OracleUtil;
@@ -30,6 +31,7 @@ public class EmpDAO {
 	int resultCount; // insert, update, delete 건수에 대해서만 결과 값을 받는다.
 	
 	@Autowired //타입이 같으면 자동으로 주입한다. (XML 파일에 bean으로 등록된 bean을 만들어서 자동 주입)
+	@Qualifier("dataSourceOriginal") //타입이 같은 bean이 여러개이면 이름으로 찾아서 주입한다. 
 	DataSource ds;
 	
 	

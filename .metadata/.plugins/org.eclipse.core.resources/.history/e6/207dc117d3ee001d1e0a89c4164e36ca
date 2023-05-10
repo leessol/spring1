@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.firstzone.emp">
+	<select id="selectAll" resultType="com.shinhan.vo.EmpVO">
+		select * from employees order
+		by 1 desc
+	</select>
+
+	<select id="selectById" parameterType="int" resultType="empvo">
+		select *
+		from employees where employee_id = #{empid}
+	</select>
+
+	<select id="selectByDept" parameterType="int" resultType="empvo">
+		select
+		* from employees where department_id = #{deptid};
+	</select>
+
+	<!-- 파라미터가 map으로도 가능하고 vo로도 가능하다. map으로 하면, 필요한 것들만 불러서 사용할 수 있음 -->
+	<!-- <select id="selectByCondition0" parameterType="map"
+		resultType="empvo">
+		select *
+		from employees
+		where department_id = #{deptid}
+		and job_id = #{jobid}
+		and salary >= #{salary}
+	</select>
+ -->
+
+	<select id="selectByCondition"  parameterType="map"
+		resultType="empvo">
+		select *
+		from employees
+		where 1 = 1
+
+		<!-- sql 문에 조건을 주어야 할때, -->
+		<if test="deptid!=null">
+			and department_id in 
+			<foreach collection="deptid" item="department_id" open="(" close=")" separator=",">
+			<!-- 왜 이렇게 하냐?: 형태가 department_id in (1,2,3,4) 이렇게 되어야 하니깐 open이랑 close를 지정해준다.  -->
+				#{department_id}	
+			</foreach>
+		</if>
+		<if test="jobid!=null and jobid!=''">
+			and job_id = #{jobid}
+		</if>
+		<if test="salary!=null and salary!=0">
+			and salary >= #{salary}
+		</if>
+
+		<if test="hire_date!=null">
+			and hire_date >= #{hire_date}
+		</if>
+
+		<!-- where department_id = #{deptid} and job_id = #{jobid} and salary >= 
+			#{salary} -->
+	</select>
+	
+	
+	<select id="selectByCondition3" parameterType="empvo"
+		resultType="empvo">
+		select *
+		from employees
+		where 1 = 1
+
+		<!-- sql 문에 조건을 주어야 할때, -->
+		<if test="department_id!=null and department_id!=0">
+			and department_id = #{department_id}
+		</if>
+		<if test="job_id!=null and job_id!=''">
+			and job_id = #{job_id}
+		</if>
+		<if test="salary!=null and salary!=0">
+			and salary >= #{salary}
+		</if>
+
+		<if test="hire_date!=null">
+			and hire_date >= #{hire_date}
+		</if>
+
+		<!-- where department_id = #{deptid} and job_id = #{jobid} and salary >= 
+			#{salary} -->
+	</select>
+
+
+	<insert id="insert" parameterType="empvo">
+		insert into employees (employee_id, first_name, last_name, job_id,
+		manager_id,
+		department_id, hire_date, phone_number, salary, email, commission_pct)
+		values
+		(seq_employee.nextval, #{employee_id}, #{first_name}, #{last_name},
+		#{job_id},
+		<if test="manager_id==0">
+			null,
+		</if>
+		<if test="manager_id!=0">
+			#{manager_id},
+		</if>
+
+		<if test="department_id==0">
+			null,
+		</if>
+		<if test="department_id!=0">
+			#{department_id},
+		</if>
+		 #{hire_date}, #{phone_number}, #{salary,
+		jdbcType=INTEGER}, #{email}, #{commission_pct})
+	</insert>
+
+	<update id="update" parameterType="empvo">
+		update employees
+		set first_name = #{first_name},
+		last_name = #{last_name},
+		job_id = #{job_id},
+		manager_id =
+		<if test="manager_id==0">
+			null,
+		</if>
+		<if test="manager_id!=0">
+			#{manager_id},
+		</if>
+		
+		
+		department_id = 
+		<if test="department_id==0">
+			null,
+		</if>
+		<if test="department_id!=0">
+			#{department_id},
+		</if>
+		
+		hire_date = #{hire_date},
+		phone_number = #{phone_number},
+		salary = #{salary},
+		email = #{email},
+		commission_pct = #{commission_pct}
+		where employee_id=#{employee_id}
+	</update>
+
+	<delete id="delete" parameterType="int">
+		delete from employees where
+		employee_id = #{employee_id}
+	</delete>
+
+</mapper>
